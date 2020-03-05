@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 
 namespace Task2
 {
@@ -7,12 +8,13 @@ namespace Task2
         static void Main(string[] args)
         {
             Console.WriteLine("Input directory path");
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures); //Console.ReadLine();
-            if (path == "")
+            string path = args[0];
+            string filter = args[1];
+            if (string.IsNullOrEmpty(path))
             {
                 path = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
             }
-            FileSystemVisitor visitor = new FileSystemVisitor();
+            FileSystemVisitor visitor = new FileSystemVisitor(file => file.EndsWith(filter));
             visitor.GetFiles(path);
             visitor.ShowFiles();
         }

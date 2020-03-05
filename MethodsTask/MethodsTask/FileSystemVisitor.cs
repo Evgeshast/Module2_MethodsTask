@@ -8,61 +8,69 @@ namespace Task2
 {
     public class FileSystemVisitor
     {
-        public FileSystemVisitor(){}
-
-        FileSystemVisitor(object filter) { }
-        public delegate void FileHandler(string message);
-        public event FileHandler Notify;
-        public delegate string ActionHandler();
-        public event ActionHandler Act;
         private List<string> files = new List<string>();
+        private Func<string, bool> _filter;
 
-        public void GetFiles(string path)
+        public event FileHandler Notify;
+        public event ActionHandler Act;
+
+        public delegate string ActionHandler();
+        public delegate void FileHandler(string message);
+
+        public FileSystemVisitor() {}
+
+        public FileSystemVisitor(Func<string, bool> filter)
         {
-            var filesInDir = Directory.GetFiles(path);
-            var subDirs = Directory.GetDirectories(path);
             Notify += DisplayMessage;
             Act += ReadMessage;
-            if (filesInDir != null)
+            _filter = filter;
+        }
+
+        public IEnumerable<string> GetFiles(string path)
+        {
+            try
             {
-                foreach (var item in filesInDir)
+                foreach (string d in Directory.GetDirectories(path))
                 {
-                    Notify?.Invoke($"File {item} found");
-                    files.Add(item);
-                    //var action = Act?.Invoke();
-                    //switch (action)
-                    //{
-                    //    case "*":
-                    //        break;
-                    //    case "$":
-                    //        continue;
-                    //}
+                    foreach (string f in Directory.GetFiles(d))
+                    {
+                        files.Add(f);
+                        Notify?.Invoke($"File {f} found");
+                        var action = Act?.Invoke();
+                        switch (action)
+                        {
+                            case "*":
+                                return files;
+                            case "$":
+                                continue;
+                            default:
+                                continue;
+                        }
+                    } 
+                    GetFiles(d);
                 }
             }
-            if (subDirs != null)
+            catch (Exception ex)
             {
-                foreach (var subDir in subDirs)
-                {
-                    Notify?.Invoke($"Directory {subDir} found");
-                    GetFiles(subDir);
-                }
+                Console.WriteLine(ex.Message);
             }
+            return files;
         }
 
         public void ShowFiles()
         {
-            foreach (var file in new FileIterator(files))
+            foreach (var file in new FileIterator(files.Where(_filter).ToList()))
             {
                 Console.WriteLine(file);
             }
         }
 
-        private static void DisplayMessage(string message)
+        private void DisplayMessage(string message)
         {
             Console.WriteLine(message);
         }
 
-        private static string ReadMessage()
+        private string ReadMessage()
         {
             return Console.ReadLine();
         }

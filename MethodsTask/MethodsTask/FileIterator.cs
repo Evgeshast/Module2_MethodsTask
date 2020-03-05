@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace Task2
 {
     public class FileIterator : IEnumerable<string>
     {
-        private List<string> _files;
+        private IEnumerable<string> _files;
        
-        public FileIterator(List<string> files)
+        public FileIterator(IEnumerable<string> files)
         {
             _files = files;
         }
