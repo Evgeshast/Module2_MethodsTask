@@ -26,7 +26,7 @@ namespace Task2
             _filter = filter;
         }
 
-        public IEnumerable<string> GetFiles(string path)
+        public IEnumerable<string> GetFilesAndFolders(string path)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace Task2
                                 continue;
                         }
                     } 
-                    GetFiles(d);
+                    GetFilesAndFolders(d);
                 }
             }
             catch (Exception ex)
